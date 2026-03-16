@@ -48,10 +48,25 @@ def gerar_grafico(frase):
                 if direcao_direita: x += distancia
                 else: y -= distancia
 
-    # Renderização para o Streamlit
-    fig, ax = plt.subplots(figsize=(8, 8))
+    # --- AJUSTE DINÂMICO DO TAMANHO DA PÁGINA ---
+    todos_x = pontos_grandes_x + pontos_pequenos_x
+    todos_y = pontos_grandes_y + pontos_pequenos_y
+    
+    if todos_x and todos_y:
+        largura = max(todos_x) - min(todos_x)
+        altura = max(todos_y) - min(todos_y)
+        # Define um fator de escala para converter unidades de dados em polegadas
+        fator_escala = 0.5 
+        fig_width = max(8, largura * fator_escala)
+        fig_height = max(8, altura * fator_escala)
+    else:
+        fig_width, fig_height = 8, 8
+
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    # s=120 e s=20 agora parecerão consistentes pois o figsize acompanha o volume de dados
     ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#95a5a6', marker='.', alpha=0.4)
     ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
+    
     ax.set_aspect('equal')
     ax.axis('off')
     return fig
@@ -77,7 +92,7 @@ if st.button("pronto"):
         st.pyplot(figura)
         
         buf = io.BytesIO()
-        figura.savefig(buf, format="png", bbox_inches='tight')
+        figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
         byte_im = buf.getvalue()
         
         st.download_button(
