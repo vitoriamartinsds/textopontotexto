@@ -57,13 +57,19 @@ def gerar_grafico(frase):
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
 
-# Lógica para o rótulo do toggle
-estado_privado = st.toggle(rotulo_botao)
-rotulo_botao = "mostrar" if estado_privado else "esconder"
+# Para evitar o NameError, definimos um estado inicial fixo ou usamos um valor padrão
+# O st.toggle retorna True se ativado, False se desativado
+estado_privado = st.toggle("Ativar/Desativar modo privado")
 
-# Input que muda o tipo baseado no estado
-tipo_input = "password" if estado_privado else "default"
-texto_usuario = st.text_input("escreve", type=tipo_input)
+# Lógica para mudar o rótulo dinamicamente baseado no estado atual
+if estado_privado:
+    st.write("Modo: Privado (Sua frase está oculta)")
+    tipo_input = "password"
+else:
+    st.write("Modo: Público (Sua frase está visível)")
+    tipo_input = "default"
+
+texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
 
 if st.button("pronto"):
     if texto_usuario:
@@ -75,10 +81,10 @@ if st.button("pronto"):
         byte_im = buf.getvalue()
         
         st.download_button(
-            label="baixar PNG",
+            label="Baixar imagem como PNG",
             data=byte_im,
-            file_name=".png",
+            file_name="meu_padrao.png",
             mime="image/png"
         )
     else:
-        st.warning("digita algo primeiro.")
+        st.warning("Por favor, digite algo primeiro.")
