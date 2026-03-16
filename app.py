@@ -57,10 +57,18 @@ def gerar_grafico(frase):
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
 
-# Usamos um checkbox que é mais estável que o toggle para trocas de estado
-esconder = st.checkbox("Esconder frase (Modo Senha)")
+# Para evitar o NameError, definimos um estado inicial fixo ou usamos um valor padrão
+# O st.toggle retorna True se ativado, False se desativado
+estado_privado = st.toggle("Ativar/Desativar modo privado")
 
-tipo_input = "password" if esconder else "default"
+# Lógica para mudar o rótulo dinamicamente baseado no estado atual
+if estado_privado:
+    st.write("Modo: Privado (Sua frase está oculta)")
+    tipo_input = "password"
+else:
+    st.write("Modo: Público (Sua frase está visível)")
+    tipo_input = "default"
+
 texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
 
 if st.button("pronto"):
