@@ -56,12 +56,12 @@ def gerar_grafico(frase):
     return fig
 
 # --- Interface do Streamlit ---
-st.title("Gerador de Padrão Geométrico")
-st.write("Digite uma frase abaixo e veja o padrão ser desenhado:")
+st.title("textopontotexto")
+st.write("escreve")
 
 texto_usuario = st.text_input("Escreva sua frase:", "Vitoria e linda")
 
-if st.button("Gerar Gráfico"):
+if st.button("pronto"):
     if texto_usuario:
         figura = gerar_grafico(texto_usuario)
         st.pyplot(figura)
