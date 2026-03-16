@@ -66,7 +66,7 @@ tipo_input = "default"
 
 # Sobrescreve apenas se for privado
 if estado_privado:
-    st.write("texto oculto")
+    st.write("")
     tipo_input = "password"
 
 texto_usuario = st.text_input("escreve", type=tipo_input)
