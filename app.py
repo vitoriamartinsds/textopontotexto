@@ -57,8 +57,12 @@ def gerar_grafico(frase):
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
 
-modo_senha = st.toggle("esconder")
-tipo_input = "password" if modo_senha else "default"
+# Lógica para o rótulo do toggle
+estado_privado = st.toggle("modo privado")
+rotulo_botao = "mostrar" if estado_privado else "esconder"
+
+# Input que muda o tipo baseado no estado
+tipo_input = "password" if estado_privado else "default"
 texto_usuario = st.text_input("escreve", type=tipo_input)
 
 if st.button("pronto"):
@@ -66,16 +70,15 @@ if st.button("pronto"):
         figura = gerar_grafico(texto_usuario)
         st.pyplot(figura)
         
-        # --- Botão de Download ---
         buf = io.BytesIO()
         figura.savefig(buf, format="png", bbox_inches='tight')
         byte_im = buf.getvalue()
         
         st.download_button(
-            label="baixar",
+            label="baixar PNG",
             data=byte_im,
-            file_name="meu_padrao.png",
+            file_name=".png",
             mime="image/png"
         )
     else:
-        st.warning("digite algo primeiro.")
+        st.warning("digita algo primeiro.")
