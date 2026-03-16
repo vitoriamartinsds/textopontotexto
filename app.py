@@ -64,7 +64,7 @@ def gerar_grafico(frase):
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     # s=120 e s=20 agora parecerão consistentes pois o figsize acompanha o volume de dados
-    ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#2c3e50', marker='.', alpha=0)
+    ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#2c3e50', marker='.', alpha=1)
     ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
     
     ax.set_aspect('equal')
