@@ -63,11 +63,11 @@ modo_senha = st.toggle("Modo privado (esconder frase)")
 
 # Se modo_senha for True, type="password", se False, type="default"
 tipo_input = "password" if modo_senha else "default"
-texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
+texto_usuario = st.text_input("escreva aqui", type=tipo_input)
 
 if st.button("pronto"):
     if texto_usuario:
         figura = gerar_grafico(texto_usuario)
         st.pyplot(figura)
     else:
-        st.warning("Por favor, digite algo primeiro.")
+        st.warning("digite algo primeiro.")
