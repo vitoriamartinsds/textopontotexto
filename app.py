@@ -57,9 +57,9 @@ def gerar_grafico(frase):
 
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
-st.write("escreve")
+#st.write("escreve")
 
-texto_usuario = st.text_input("Escreva sua frase:", "Vitoria e linda")
+texto_usuario = st.text_input("escreve")
 
 if st.button("pronto"):
     if texto_usuario:
