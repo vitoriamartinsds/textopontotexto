@@ -58,7 +58,7 @@ def gerar_grafico(frase):
 st.title("textopontotexto")
 
 # Lógica para o rótulo do toggle
-estado_privado = st.toggle("modo privado")
+estado_privado = st.toggle(rotulo_botao)
 rotulo_botao = "mostrar" if estado_privado else "esconder"
 
 # Input que muda o tipo baseado no estado
