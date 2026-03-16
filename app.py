@@ -57,9 +57,13 @@ def gerar_grafico(frase):
 
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
-#st.write("escreve")
 
-texto_usuario = st.text_input("escreve")
+# Alternador para modo privado/senha
+modo_senha = st.toggle("Modo privado (esconder frase)")
+
+# Se modo_senha for True, type="password", se False, type="default"
+tipo_input = "password" if modo_senha else "default"
+texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
 
 if st.button("pronto"):
     if texto_usuario:
