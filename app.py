@@ -59,16 +59,15 @@ def gerar_grafico(frase):
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
 
-# O st.toggle retorna True se ativado, False se desativado
 estado_privado = st.toggle("Ativar/Desativar modo privado")
 
-# Lógica para mudar o rótulo dinamicamente baseado no estado atual
+# Define o padrão como "default"
+tipo_input = "default"
+
+# Sobrescreve apenas se for privado
 if estado_privado:
     st.write("Modo: Privado (Sua frase está oculta)")
     tipo_input = "password"
-else:
-    st.write("Modo: Público (Sua frase está visível)")
-    tipo_input = "default"
 
 texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
 
