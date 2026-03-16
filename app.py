@@ -59,7 +59,7 @@ def gerar_grafico(frase):
 st.title("textopontotexto")
 
 # Alternador para modo privado/senha
-modo_senha = st.toggle("Modo privado (esconder frase)")
+modo_senha = st.toggle("esconder")
 
 # Se modo_senha for True, type="password", se False, type="default"
 tipo_input = "password" if modo_senha else "default"
