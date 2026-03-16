@@ -59,17 +59,17 @@ def gerar_grafico(frase):
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
 
-estado_privado = st.toggle("Ativar/Desativar modo privado")
+estado_privado = st.toggle("esconder")
 
 # Define o padrão como "default"
 tipo_input = "default"
 
 # Sobrescreve apenas se for privado
 if estado_privado:
-    st.write("Modo: Privado (Sua frase está oculta)")
+    st.write("texto oculto")
     tipo_input = "password"
 
-texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
+texto_usuario = st.text_input("escreve", type=tipo_input)
 
 if st.button("pronto"):
     if texto_usuario:
@@ -81,10 +81,10 @@ if st.button("pronto"):
         byte_im = buf.getvalue()
         
         st.download_button(
-            label="Baixar imagem como PNG",
+            label="salvar",
             data=byte_im,
-            file_name="meu_padrao.png",
+            file_name="textopontotexto.png",
             mime="image/png"
         )
     else:
-        st.warning("Por favor, digite algo primeiro.")
+        st.warning("digite primeiro.")
