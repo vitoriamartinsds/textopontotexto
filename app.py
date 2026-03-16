@@ -1,6 +1,7 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import unicodedata
+import io
 
 # Função para remover acentos
 def remover_acentos(texto):
@@ -17,7 +18,6 @@ def gerar_grafico(frase):
     pontos_grandes_x, pontos_grandes_y = [], []
     pontos_pequenos_x, pontos_pequenos_y = [], []
     
-    # Configurações de estilo fixas
     espacamento_vertical = 2 
     
     for p_idx, palavra in enumerate(palavras):
@@ -47,7 +47,6 @@ def gerar_grafico(frase):
                 if direcao_direita: x += distancia
                 else: y -= distancia
 
-    # Renderização para o Streamlit
     fig, ax = plt.subplots(figsize=(8, 8))
     ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#95a5a6', marker='.', alpha=0.4)
     ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
@@ -58,16 +57,25 @@ def gerar_grafico(frase):
 # --- Interface do Streamlit ---
 st.title("textopontotexto")
 
-# Alternador para modo privado/senha
 modo_senha = st.toggle("esconder")
-
-# Se modo_senha for True, type="password", se False, type="default"
 tipo_input = "password" if modo_senha else "default"
-texto_usuario = st.text_input("escreva aqui", type=tipo_input)
+texto_usuario = st.text_input("escreve", type=tipo_input)
 
 if st.button("pronto"):
     if texto_usuario:
         figura = gerar_grafico(texto_usuario)
         st.pyplot(figura)
+        
+        # --- Botão de Download ---
+        buf = io.BytesIO()
+        figura.savefig(buf, format="png", bbox_inches='tight')
+        byte_im = buf.getvalue()
+        
+        st.download_button(
+            label="baixar",
+            data=byte_im,
+            file_name="meu_padrao.png",
+            mime="image/png"
+        )
     else:
         st.warning("digite algo primeiro.")
