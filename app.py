@@ -59,15 +59,7 @@ st.title("textopontotexto")
 
 # Para evitar o NameError, definimos um estado inicial fixo ou usamos um valor padrão
 # O st.toggle retorna True se ativado, False se desativado
-estado_privado = st.toggle("Ativar/Desativar modo privado")
-
-# Lógica para mudar o rótulo dinamicamente baseado no estado atual
-if estado_privado:
-    st.write("Modo: Privado (Sua frase está oculta)")
-    tipo_input = "password"
-else:
-    st.write("Modo: Público (Sua frase está visível)")
-    tipo_input = "default"
+estado_privado = st.toggle("esconder")
 
 texto_usuario = st.text_input("Escreva sua frase:", type=tipo_input)
 
@@ -81,10 +73,10 @@ if st.button("pronto"):
         byte_im = buf.getvalue()
         
         st.download_button(
-            label="Baixar imagem como PNG",
+            label="salvar",
             data=byte_im,
-            file_name="meu_padrao.png",
+            file_name="textopontotexto.png",
             mime="image/png"
         )
     else:
-        st.warning("Por favor, digite algo primeiro.")
+        st.warning("digite algo primeiro.")
