@@ -9,7 +9,15 @@ def remover_acentos(texto):
     return "".join(c for c in unicodedata.normalize('NFD', texto)
                     if unicodedata.category(c) != 'Mn')
 
-# Função principal de geração do gráfico
+# Estado inicial
+if "texto" not in st.session_state:
+    st.session_state.texto = ""
+
+# Callback para atualizar em tempo real
+def atualizar_texto():
+    st.session_state.texto = st.session_state.input_texto
+
+# Função principal
 def gerar_grafico(frase):
     frase_limpa = remover_acentos(frase.upper())
     
@@ -33,7 +41,6 @@ def gerar_grafico(frase):
             for i in range(len(palavra)):
                 char = palavra[i]
                 
-                # Pontuação
                 if char in string.punctuation:
                     pontos_pontuacao_x.append(x)
                     pontos_pontuacao_y.append(y)
@@ -103,18 +110,22 @@ if estado_privado:
         <style>
         textarea {
             color: transparent !important;
-            text-shadow: 0 0 8px rgba(0,0,0,0.5); /* efeito tipo blur */
             caret-color: black !important;
         }
         </style>
     """, unsafe_allow_html=True)
 
-# Input (agora simples e confiável)
-texto_usuario = st.text_area("escreve", height=200)
+# Input com callback (ESSENCIAL)
+st.text_area(
+    "escreve",
+    height=200,
+    key="input_texto",
+    on_change=atualizar_texto
+)
 
-# --- REVELAÇÃO EM TEMPO REAL ---
-if texto_usuario:
-    figura = gerar_grafico(texto_usuario)
+# --- ATUALIZA EM TEMPO REAL ---
+if st.session_state.texto:
+    figura = gerar_grafico(st.session_state.texto)
     st.pyplot(figura)
     
     buf = io.BytesIO()
