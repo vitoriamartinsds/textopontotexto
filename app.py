@@ -4,12 +4,10 @@ import unicodedata
 import io
 import string
 
-# Função para remover acentos
 def remover_acentos(texto):
     return "".join(c for c in unicodedata.normalize('NFD', texto)
                     if unicodedata.category(c) != 'Mn')
 
-# Função principal de geração do gráfico
 def gerar_grafico(frase):
     frase_limpa = remover_acentos(frase.upper())
     
@@ -30,23 +28,24 @@ def gerar_grafico(frase):
         for p_idx, palavra in enumerate(palavras):
             x, y = 0, -(linha_offset + p_idx) * espacamento_vertical
             
+            ultimo_x, ultimo_y = x, y
+            
             for i in range(len(palavra)):
                 char = palavra[i]
                 
-                # --- PONTUAÇÃO CORRIGIDA ---
                 if char in string.punctuation:
-                    # NÃO cria novo ponto grande
-                    # só adiciona a pontuação na posição atual
-                    pontos_pontuacao_x.append(x)
-                    pontos_pontuacao_y.append(y)
+                    # ponto ao lado do último ponto da letra
+                    pontos_pontuacao_x.append(ultimo_x + 0.6)
+                    pontos_pontuacao_y.append(ultimo_y)
                     continue
                 
-                if char not in alfabeto: 
+                if char not in alfabeto:
                     continue
                 
-                # ponto da letra
                 pontos_grandes_x.append(x)
                 pontos_grandes_y.append(y)
+                
+                ultimo_x, ultimo_y = x, y
                 
                 if i + 1 < len(palavra):
                     prox_char = palavra[i+1]
@@ -60,7 +59,6 @@ def gerar_grafico(frase):
                     distancia = (idx_prox - idx_atual) if idx_prox >= idx_atual else (n_letras - idx_atual) + idx_prox
                     direcao_direita = (i % 2 == 0)
                     
-                    # --- CORREÇÃO DAS PALAVRAS CURTAS ---
                     if distancia > 2:
                         for d in range(1, distancia):
                             if direcao_direita:
@@ -70,9 +68,9 @@ def gerar_grafico(frase):
                                 pontos_pequenos_x.append(x)
                                 pontos_pequenos_y.append(y - d)
                     
-                    if direcao_direita: 
+                    if direcao_direita:
                         x += distancia
-                    else: 
+                    else:
                         y -= distancia
         
         linha_offset += len(palavras) + 1
@@ -93,8 +91,6 @@ def gerar_grafico(frase):
     
     ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#2c3e50', marker='.', alpha=1)
     ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
-    
-    # pontuação (agora correta)
     ax.scatter(pontos_pontuacao_x, pontos_pontuacao_y, s=80, c='red', zorder=4)
     
     ax.set_aspect('equal')
