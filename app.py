@@ -33,12 +33,10 @@ def gerar_grafico(frase):
             for i in range(len(palavra)):
                 char = palavra[i]
                 
+                # --- PONTUAÇÃO CORRIGIDA ---
                 if char in string.punctuation:
-                    # garante ponto da "última letra"
-                    pontos_grandes_x.append(x)
-                    pontos_grandes_y.append(y)
-                    
-                    # adiciona ponto da pontuação (cor diferente)
+                    # NÃO cria novo ponto grande
+                    # só adiciona a pontuação na posição atual
                     pontos_pontuacao_x.append(x)
                     pontos_pontuacao_y.append(y)
                     continue
@@ -46,6 +44,7 @@ def gerar_grafico(frase):
                 if char not in alfabeto: 
                     continue
                 
+                # ponto da letra
                 pontos_grandes_x.append(x)
                 pontos_grandes_y.append(y)
                 
@@ -61,16 +60,20 @@ def gerar_grafico(frase):
                     distancia = (idx_prox - idx_atual) if idx_prox >= idx_atual else (n_letras - idx_atual) + idx_prox
                     direcao_direita = (i % 2 == 0)
                     
-                    for d in range(1, distancia):
-                        if direcao_direita:
-                            pontos_pequenos_x.append(x + d)
-                            pontos_pequenos_y.append(y)
-                        else:
-                            pontos_pequenos_x.append(x)
-                            pontos_pequenos_y.append(y - d)
+                    # --- CORREÇÃO DAS PALAVRAS CURTAS ---
+                    if distancia > 2:
+                        for d in range(1, distancia):
+                            if direcao_direita:
+                                pontos_pequenos_x.append(x + d)
+                                pontos_pequenos_y.append(y)
+                            else:
+                                pontos_pequenos_x.append(x)
+                                pontos_pequenos_y.append(y - d)
                     
-                    if direcao_direita: x += distancia
-                    else: y -= distancia
+                    if direcao_direita: 
+                        x += distancia
+                    else: 
+                        y -= distancia
         
         linha_offset += len(palavras) + 1
 
@@ -90,6 +93,8 @@ def gerar_grafico(frase):
     
     ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#2c3e50', marker='.', alpha=1)
     ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
+    
+    # pontuação (agora correta)
     ax.scatter(pontos_pontuacao_x, pontos_pontuacao_y, s=80, c='red', zorder=4)
     
     ax.set_aspect('equal')
@@ -101,7 +106,6 @@ st.title("textopontotexto")
 
 estado_privado = st.toggle("esconder")
 
-# CSS REAL de máscara tipo senha
 if estado_privado:
     st.markdown("""
         <style>
@@ -111,7 +115,6 @@ if estado_privado:
         </style>
     """, unsafe_allow_html=True)
 
-# Caixa de texto com parágrafos
 texto_usuario = st.text_area("escreve", height=200)
 
 if st.button("pronto"):
