@@ -9,10 +9,6 @@ def remover_acentos(texto):
     return "".join(c for c in unicodedata.normalize('NFD', texto)
                     if unicodedata.category(c) != 'Mn')
 
-# Inicializa estado
-if "texto_real" not in st.session_state:
-    st.session_state.texto_real = ""
-
 # Função principal de geração do gráfico
 def gerar_grafico(frase):
     frase_limpa = remover_acentos(frase.upper())
@@ -37,6 +33,7 @@ def gerar_grafico(frase):
             for i in range(len(palavra)):
                 char = palavra[i]
                 
+                # Pontuação
                 if char in string.punctuation:
                     pontos_pontuacao_x.append(x)
                     pontos_pontuacao_y.append(y)
@@ -100,47 +97,35 @@ st.title("textopontotexto")
 
 estado_privado = st.toggle("esconder")
 
-# Função para atualizar texto real
-def atualizar_texto():
-    entrada = st.session_state.input_visivel
-    real = st.session_state.texto_real
-    
-    # Detecta se digitou ou apagou
-    if len(entrada) > len(real):
-        novo_char = entrada[-1]
-        st.session_state.texto_real += novo_char
-    elif len(entrada) < len(real):
-        st.session_state.texto_real = real[:len(entrada)]
-
-# Define o que aparece na tela
+# CSS para esconder texto
 if estado_privado:
-    texto_visivel = "•" * len(st.session_state.texto_real)
+    st.markdown("""
+        <style>
+        textarea {
+            color: transparent !important;
+            text-shadow: 0 0 8px rgba(0,0,0,0.5); /* efeito tipo blur */
+            caret-color: black !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+# Input (agora simples e confiável)
+texto_usuario = st.text_area("escreve", height=200)
+
+# --- REVELAÇÃO EM TEMPO REAL ---
+if texto_usuario:
+    figura = gerar_grafico(texto_usuario)
+    st.pyplot(figura)
+    
+    buf = io.BytesIO()
+    figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
+    byte_im = buf.getvalue()
+    
+    st.download_button(
+        label="salvar",
+        data=byte_im,
+        file_name="textopontotexto.png",
+        mime="image/png"
+    )
 else:
-    texto_visivel = st.session_state.texto_real
-
-# Caixa de texto
-st.text_area(
-    "escreve",
-    value=texto_visivel,
-    height=200,
-    key="input_visivel",
-    on_change=atualizar_texto
-)
-
-if st.button("pronto"):
-    if st.session_state.texto_real:
-        figura = gerar_grafico(st.session_state.texto_real)
-        st.pyplot(figura)
-        
-        buf = io.BytesIO()
-        figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
-        byte_im = buf.getvalue()
-        
-        st.download_button(
-            label="salvar",
-            data=byte_im,
-            file_name="textopontotexto.png",
-            mime="image/png"
-        )
-    else:
-        st.warning("digite primeiro.")
+    st.write("digite para gerar o gráfico...")
