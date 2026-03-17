@@ -69,17 +69,9 @@ def gerar_grafico(frase):
         
         linha_offset += len(palavras) + 1
 
-    todos_x = pontos_grandes_x + pontos_pequenos_x + pontos_pontuacao_x
-    todos_y = pontos_grandes_y + pontos_pequenos_y + pontos_pontuacao_y
-    
-    if todos_x and todos_y:
-        largura = max(todos_x) - min(todos_x)
-        altura = max(todos_y) - min(todos_y)
-        fator_escala = 0.5 
-        fig_width = max(8, largura * fator_escala)
-        fig_height = max(8, altura * fator_escala)
-    else:
-        fig_width, fig_height = 8, 8
+    # --- TAMANHO FIXO A3 (em polegadas) ---
+    fig_width = 11.69   # largura (A3 retrato)
+    fig_height = 16.54  # altura (A3 retrato)
 
     fig, ax = plt.subplots(figsize=(fig_width, fig_height))
     
@@ -89,6 +81,7 @@ def gerar_grafico(frase):
     
     ax.set_aspect('equal')
     ax.axis('off')
+    
     return fig
 
 # --- Interface ---
@@ -96,7 +89,7 @@ st.title("textopontotexto")
 
 estado_privado = st.toggle("esconder")
 
-# CSS REAL de máscara tipo senha
+# Máscara tipo senha
 if estado_privado:
     st.markdown("""
         <style>
@@ -106,7 +99,7 @@ if estado_privado:
         </style>
     """, unsafe_allow_html=True)
 
-# Caixa de texto com parágrafos
+# Input com parágrafos
 texto_usuario = st.text_area("escreve", height=200)
 
 if st.button("pronto"):
@@ -115,13 +108,13 @@ if st.button("pronto"):
         st.pyplot(figura)
         
         buf = io.BytesIO()
-        figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
+        figura.savefig(buf, format="png", bbox_inches='tight', dpi=300)  # dpi maior pra impressão
         byte_im = buf.getvalue()
         
         st.download_button(
             label="salvar",
             data=byte_im,
-            file_name="textopontotexto.png",
+            file_name="textopontotexto_A3.png",
             mime="image/png"
         )
     else:
