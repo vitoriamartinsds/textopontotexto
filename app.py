@@ -9,15 +9,7 @@ def remover_acentos(texto):
     return "".join(c for c in unicodedata.normalize('NFD', texto)
                     if unicodedata.category(c) != 'Mn')
 
-# Estado inicial
-if "texto" not in st.session_state:
-    st.session_state.texto = ""
-
-# Callback para atualizar em tempo real
-def atualizar_texto():
-    st.session_state.texto = st.session_state.input_texto
-
-# Função principal
+# Função principal de geração do gráfico
 def gerar_grafico(frase):
     frase_limpa = remover_acentos(frase.upper())
     
@@ -104,39 +96,33 @@ st.title("textopontotexto")
 
 estado_privado = st.toggle("esconder")
 
-# CSS para esconder texto
+# CSS REAL de máscara tipo senha
 if estado_privado:
     st.markdown("""
         <style>
         textarea {
-            color: transparent !important;
-            caret-color: black !important;
+            -webkit-text-security: disc;
         }
         </style>
     """, unsafe_allow_html=True)
 
-# Input com callback (ESSENCIAL)
-st.text_area(
-    "escreve",
-    height=200,
-    key="input_texto",
-    on_change=atualizar_texto
-)
+# Caixa de texto com parágrafos
+texto_usuario = st.text_area("escreve", height=200)
 
-# --- ATUALIZA EM TEMPO REAL ---
-if st.session_state.texto:
-    figura = gerar_grafico(st.session_state.texto)
-    st.pyplot(figura)
-    
-    buf = io.BytesIO()
-    figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
-    byte_im = buf.getvalue()
-    
-    st.download_button(
-        label="salvar",
-        data=byte_im,
-        file_name="textopontotexto.png",
-        mime="image/png"
-    )
-else:
-    st.write("digite para gerar o gráfico...")
+if st.button("pronto"):
+    if texto_usuario:
+        figura = gerar_grafico(texto_usuario)
+        st.pyplot(figura)
+        
+        buf = io.BytesIO()
+        figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
+        byte_im = buf.getvalue()
+        
+        st.download_button(
+            label="salvar",
+            data=byte_im,
+            file_name="textopontotexto.png",
+            mime="image/png"
+        )
+    else:
+        st.warning("digite primeiro.")
