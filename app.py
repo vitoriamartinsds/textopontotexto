@@ -1,64 +1,53 @@
-import tkinter as tk
+import streamlit as st
 import unicodedata
 
 def remover_acentos(texto):
-    # Normaliza o texto para remover acentos (ex: á -> a)
     nfkd_form = unicodedata.normalize('NFKD', texto)
     return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-def desenhar_bolinhas():
-    # Limpa o canvas antes de desenhar
-    canvas.delete("all")
-    
-    # Pega o texto da caixa de texto (multilinha)
-    texto_bruto = text_input.get("1.0", tk.END)
+def renderizar_bolinhas(texto_bruto):
     texto = remover_acentos(texto_bruto).lower()
+    linhas = texto.split('\n')
     
-    x_inicial = 20
-    y_inicial = 30
-    x, y = x_inicial, y_inicial
-    raio = 10
-    espacamento = 30
-    largura_maxima = 560 # Limite lateral do canvas
-
-    for char in texto:
-        if char == '\n': # Pula linha se houver um parágrafo
-            x = x_inicial
-            y += espacamento + 10
+    # Cores
+    cor_letra = "#3498db"   # Azul
+    cor_ponto = "#e74c3c"   # Vermelho (ou a cor que preferir para destaque)
+    
+    html_gerado = "<div style='line-height: 2.5;'>"
+    
+    for linha in linhas:
+        if not linha.strip():
+            html_gerado += "<br>" # Mantém o parágrafo vazio se houver
             continue
             
-        if char == " ": # Espaço em branco
-            x += espacamento
-        elif char in ".,!?;:": # Pontuação (Bolinha de cor diferente)
-            canvas.create_oval(x, y, x + raio*2, y + raio*2, fill="#7f8c8d", outline="black")
-            x += espacamento
-        elif 'a' <= char <= 'z': # Letras normais
-            canvas.create_oval(x, y, x + raio*2, y + raio*2, fill="#3498db", outline="black")
-            x += espacamento
+        for char in linha:
+            if char == " ":
+                # Espaço vazio
+                html_gerado += "<span style='margin-right: 25px;'></span>"
+            elif char in ".,!?;:":
+                # Bolinha de pontuação
+                html_gerado += f"<span style='height: 15px; width: 15px; background-color: {cor_ponto}; border-radius: 50%; display: inline-block; margin-right: 10px; border: 1px solid black;'></span>"
+            elif 'a' <= char <= 'z':
+                # Bolinha de letra
+                html_gerado += f"<span style='height: 15px; width: 15px; background-color: {cor_letra}; border-radius: 50%; display: inline-block; margin-right: 10px; border: 1px solid black;'></span>"
         
-        # Quebra de linha automática se chegar na borda do canvas
-        if x > largura_maxima:
-            x = x_inicial
-            y += espacamento
+        html_gerado += "<br>" # Quebra de linha ao fim de cada parágrafo
+        
+    html_gerado += "</div>"
+    return html_gerado
 
-# Configuração da Janela Principal
-root = tk.Tk()
-root.title("Conversor de Texto para Bolinhas")
-root.geometry("6000x700")
+# Interface Streamlit
+st.title("Conversor de Texto em Bolinhas")
+st.markdown("Os acentos serão removidos e as pontuações terão cores diferentes.")
 
-# Interface
-label = tk.Label(root, text="Digite seu texto (com parágrafos e acentos):", font=("Arial", 12))
-label.pack(pady=10)
+# Área de texto (Multilinha e maior)
+entrada = st.text_area("Digite seu texto aqui:", height=200)
 
-# Caixa de texto multilinha (Text no lugar de Entry)
-text_input = tk.Text(root, height=5, width=50, font=("Arial", 12))
-text_input.pack(pady=5)
-
-btn_gerar = tk.Button(root, text="Gerar Bolinhas", command=desenhar_bolinhas, bg="#2ecc71", fg="white", font=("Arial", 10, "bold"))
-btn_gerar.pack(pady=10)
-
-# Canvas para desenhar
-canvas = tk.Canvas(root, width=580, height=400, bg="white", highlightthickness=1, highlightbackground="black")
-canvas.pack(pady=10)
-
-root.mainloop()
+if st.button("Gerar Visualização"):
+    if entrada:
+        resultado_html = renderizar_bolinhas(entrada)
+        st.markdown("---")
+        st.write("### Resultado:")
+        st.markdown(resultado_html, unsafe_allow_html=True)
+    else:
+        st.warning("Por favor, digite algum texto.")
