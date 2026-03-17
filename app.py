@@ -1,105 +1,64 @@
-import streamlit as st
-import matplotlib.pyplot as plt
+import tkinter as tk
 import unicodedata
-import io
 
-# Função para remover acentos
 def remover_acentos(texto):
-    return "".join(c for c in unicodedata.normalize('NFD', texto)
-                    if unicodedata.category(c) != 'Mn')
+    # Normaliza o texto para remover acentos (ex: á -> a)
+    nfkd_form = unicodedata.normalize('NFKD', texto)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-# Função principal de geração do gráfico
-def gerar_grafico(frase):
-    frase_limpa = remover_acentos(frase.upper())
-    palavras = frase_limpa.split()
-    alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    n_letras = len(alfabeto)
+def desenhar_bolinhas():
+    # Limpa o canvas antes de desenhar
+    canvas.delete("all")
     
-    pontos_grandes_x, pontos_grandes_y = [], []
-    pontos_pequenos_x, pontos_pequenos_y = [], []
+    # Pega o texto da caixa de texto (multilinha)
+    texto_bruto = text_input.get("1.0", tk.END)
+    texto = remover_acentos(texto_bruto).lower()
     
-    # Configurações de estilo fixas
-    espacamento_vertical = 2 
-    
-    for p_idx, palavra in enumerate(palavras):
-        x, y = 0, -(p_idx * espacamento_vertical)
-        
-        for i in range(len(palavra)):
-            char = palavra[i]
-            if char not in alfabeto: continue
+    x_inicial = 20
+    y_inicial = 30
+    x, y = x_inicial, y_inicial
+    raio = 10
+    espacamento = 30
+    largura_maxima = 560 # Limite lateral do canvas
+
+    for char in texto:
+        if char == '\n': # Pula linha se houver um parágrafo
+            x = x_inicial
+            y += espacamento + 10
+            continue
             
-            pontos_grandes_x.append(x)
-            pontos_grandes_y.append(y)
-            
-            if i + 1 < len(palavra):
-                idx_atual = alfabeto.index(char)
-                idx_prox = alfabeto.index(palavra[i+1])
-                distancia = (idx_prox - idx_atual) if idx_prox >= idx_atual else (n_letras - idx_atual) + idx_prox
-                direcao_direita = (i % 2 == 0)
-                
-                for d in range(1, distancia):
-                    if direcao_direita:
-                        pontos_pequenos_x.append(x + d)
-                        pontos_pequenos_y.append(y)
-                    else:
-                        pontos_pequenos_x.append(x)
-                        pontos_pequenos_y.append(y - d)
-                
-                if direcao_direita: x += distancia
-                else: y -= distancia
-
-    # --- AJUSTE DINÂMICO DO TAMANHO DA PÁGINA ---
-    todos_x = pontos_grandes_x + pontos_pequenos_x
-    todos_y = pontos_grandes_y + pontos_pequenos_y
-    
-    if todos_x and todos_y:
-        largura = max(todos_x) - min(todos_x)
-        altura = max(todos_y) - min(todos_y)
-        # Define um fator de escala para converter unidades de dados em polegadas
-        fator_escala = 0.5 
-        fig_width = max(8, largura * fator_escala)
-        fig_height = max(8, altura * fator_escala)
-    else:
-        fig_width, fig_height = 8, 8
-
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    # s=120 e s=20 agora parecerão consistentes pois o figsize acompanha o volume de dados
-    ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#2c3e50', marker='.', alpha=1)
-    ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
-    
-    ax.set_aspect('equal')
-    ax.axis('off')
-    return fig
-
-# --- Interface do Streamlit ---
-st.title("textopontotexto")
-
-estado_privado = st.toggle("esconder")
-
-# Define o padrão como "default"
-tipo_input = "default"
-
-# Sobrescreve apenas se for privado
-if estado_privado:
-    st.write("")
-    tipo_input = "password"
-
-texto_usuario = st.text_input("escreve", type=tipo_input)
-
-if st.button("pronto"):
-    if texto_usuario:
-        figura = gerar_grafico(texto_usuario)
-        st.pyplot(figura)
+        if char == " ": # Espaço em branco
+            x += espacamento
+        elif char in ".,!?;:": # Pontuação (Bolinha de cor diferente)
+            canvas.create_oval(x, y, x + raio*2, y + raio*2, fill="#7f8c8d", outline="black")
+            x += espacamento
+        elif 'a' <= char <= 'z': # Letras normais
+            canvas.create_oval(x, y, x + raio*2, y + raio*2, fill="#3498db", outline="black")
+            x += espacamento
         
-        buf = io.BytesIO()
-        figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
-        byte_im = buf.getvalue()
-        
-        st.download_button(
-            label="salvar",
-            data=byte_im,
-            file_name="textopontotexto.png",
-            mime="image/png"
-        )
-    else:
-        st.warning("digite primeiro.")
+        # Quebra de linha automática se chegar na borda do canvas
+        if x > largura_maxima:
+            x = x_inicial
+            y += espacamento
+
+# Configuração da Janela Principal
+root = tk.Tk()
+root.title("Conversor de Texto para Bolinhas")
+root.geometry("6000x700")
+
+# Interface
+label = tk.Label(root, text="Digite seu texto (com parágrafos e acentos):", font=("Arial", 12))
+label.pack(pady=10)
+
+# Caixa de texto multilinha (Text no lugar de Entry)
+text_input = tk.Text(root, height=5, width=50, font=("Arial", 12))
+text_input.pack(pady=5)
+
+btn_gerar = tk.Button(root, text="Gerar Bolinhas", command=desenhar_bolinhas, bg="#2ecc71", fg="white", font=("Arial", 10, "bold"))
+btn_gerar.pack(pady=10)
+
+# Canvas para desenhar
+canvas = tk.Canvas(root, width=580, height=400, bg="white", highlightthickness=1, highlightbackground="black")
+canvas.pack(pady=10)
+
+root.mainloop()
