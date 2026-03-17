@@ -9,10 +9,6 @@ def remover_acentos(texto):
     return "".join(c for c in unicodedata.normalize('NFD', texto)
                     if unicodedata.category(c) != 'Mn')
 
-# Inicializa estado
-if "texto_real" not in st.session_state:
-    st.session_state.texto_real = ""
-
 # Função principal de geração do gráfico
 def gerar_grafico(frase):
     frase_limpa = remover_acentos(frase.upper())
@@ -100,36 +96,22 @@ st.title("textopontotexto")
 
 estado_privado = st.toggle("esconder")
 
-# Função para atualizar texto real
-def atualizar_texto():
-    entrada = st.session_state.input_visivel
-    real = st.session_state.texto_real
-    
-    # Detecta se digitou ou apagou
-    if len(entrada) > len(real):
-        novo_char = entrada[-1]
-        st.session_state.texto_real += novo_char
-    elif len(entrada) < len(real):
-        st.session_state.texto_real = real[:len(entrada)]
-
-# Define o que aparece na tela
+# CSS REAL de máscara tipo senha
 if estado_privado:
-    texto_visivel = "•" * len(st.session_state.texto_real)
-else:
-    texto_visivel = st.session_state.texto_real
+    st.markdown("""
+        <style>
+        textarea {
+            -webkit-text-security: disc;
+        }
+        </style>
+    """, unsafe_allow_html=True)
 
-# Caixa de texto
-st.text_area(
-    "escreve",
-    value=texto_visivel,
-    height=200,
-    key="input_visivel",
-    on_change=atualizar_texto
-)
+# Caixa de texto com parágrafos
+texto_usuario = st.text_area("escreve", height=200)
 
 if st.button("pronto"):
-    if st.session_state.texto_real:
-        figura = gerar_grafico(st.session_state.texto_real)
+    if texto_usuario:
+        figura = gerar_grafico(texto_usuario)
         st.pyplot(figura)
         
         buf = io.BytesIO()
