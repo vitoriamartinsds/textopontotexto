@@ -34,6 +34,11 @@ def gerar_grafico(frase):
                 char = palavra[i]
                 
                 if char in string.punctuation:
+                    # garante ponto da "última letra"
+                    pontos_grandes_x.append(x)
+                    pontos_grandes_y.append(y)
+                    
+                    # adiciona ponto da pontuação (cor diferente)
                     pontos_pontuacao_x.append(x)
                     pontos_pontuacao_y.append(y)
                     continue
