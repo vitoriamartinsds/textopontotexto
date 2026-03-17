@@ -1,105 +1,38 @@
 import streamlit as st
-import matplotlib.pyplot as plt
 import unicodedata
-import io
 
-# Função para remover acentos
+# Função para tratar os acentos (Requisito 1)
 def remover_acentos(texto):
-    return "".join(c for c in unicodedata.normalize('NFD', texto)
-                    if unicodedata.category(c) != 'Mn')
+    nfkd_form = unicodedata.normalize('NFKD', texto)
+    return "".join([c for c in nfkd_form if not unicodedata.combining(c)])
 
-# Função principal de geração do gráfico
-def gerar_grafico(frase):
-    frase_limpa = remover_acentos(frase.upper())
-    palavras = frase_limpa.split()
-    alfabeto = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    n_letras = len(alfabeto)
-    
-    pontos_grandes_x, pontos_grandes_y = [], []
-    pontos_pequenos_x, pontos_pequenos_y = [], []
-    
-    # Configurações de estilo fixas
-    espacamento_vertical = 2 
-    
-    for p_idx, palavra in enumerate(palavras):
-        x, y = 0, -(p_idx * espacamento_vertical)
+st.title("Conversor de Texto para Bolinhas")
+
+# Caixa de texto aumentada para aceitar parágrafos (Requisito 2)
+entrada = st.text_area("Digite seu texto (com parágrafos e acentos):", height=200)
+
+if st.button("Gerar Bolinhas"):
+    if entrada:
+        # Processa o texto para ignorar acentos e padronizar
+        texto_processado = remover_acentos(entrada).lower()
         
-        for i in range(len(palavra)):
-            char = palavra[i]
-            if char not in alfabeto: continue
+        # Divide o texto por quebras de linha (Requisito 2)
+        paragrafos = texto_processado.split('\n')
+        
+        resultado_html = ""
+        for paragrafo in paragrafos:
+            linha_html = "<div style='margin-bottom: 20px;'>" # Espaço entre parágrafos
+            for char in paragrafo:
+                if char == " ":
+                    linha_html += "<span style='margin-right: 20px;'></span>"
+                # Identifica pontuação para mudar a cor (Requisito 3)
+                elif char in ".,!?;:":
+                    linha_html += "<span style='height: 15px; width: 15px; background-color: #e74c3c; border-radius: 50%; display: inline-block; margin-right: 5px;'></span>"
+                elif 'a' <= char <= 'z':
+                    linha_html += "<span style='height: 15px; width: 15px; background-color: #3498db; border-radius: 50%; display: inline-block; margin-right: 5px;'></span>"
+            linha_html += "</div>"
+            resultado_html += linha_html
             
-            pontos_grandes_x.append(x)
-            pontos_grandes_y.append(y)
-            
-            if i + 1 < len(palavra):
-                idx_atual = alfabeto.index(char)
-                idx_prox = alfabeto.index(palavra[i+1])
-                distancia = (idx_prox - idx_atual) if idx_prox >= idx_atual else (n_letras - idx_atual) + idx_prox
-                direcao_direita = (i % 2 == 0)
-                
-                for d in range(1, distancia):
-                    if direcao_direita:
-                        pontos_pequenos_x.append(x + d)
-                        pontos_pequenos_y.append(y)
-                    else:
-                        pontos_pequenos_x.append(x)
-                        pontos_pequenos_y.append(y - d)
-                
-                if direcao_direita: x += distancia
-                else: y -= distancia
-
-    # --- AJUSTE DINÂMICO DO TAMANHO DA PÁGINA ---
-    todos_x = pontos_grandes_x + pontos_pequenos_x
-    todos_y = pontos_grandes_y + pontos_pequenos_y
-    
-    if todos_x and todos_y:
-        largura = max(todos_x) - min(todos_x)
-        altura = max(todos_y) - min(todos_y)
-        # Define um fator de escala para converter unidades de dados em polegadas
-        fator_escala = 0.5 
-        fig_width = max(8, largura * fator_escala)
-        fig_height = max(8, altura * fator_escala)
+        st.markdown(resultado_html, unsafe_allow_html=True)
     else:
-        fig_width, fig_height = 8, 8
-
-    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
-    # s=120 e s=20 agora parecerão consistentes pois o figsize acompanha o volume de dados
-    ax.scatter(pontos_pequenos_x, pontos_pequenos_y, s=20, c='#2c3e50', marker='.', alpha=1)
-    ax.scatter(pontos_grandes_x, pontos_grandes_y, s=120, c='#2c3e50', edgecolors="black", zorder=3)
-    
-    ax.set_aspect('equal')
-    ax.axis('off')
-    return fig
-
-# --- Interface do Streamlit ---
-st.title("textopontotexto")
-
-estado_privado = st.toggle("esconder")
-
-# Define o padrão como "default"
-tipo_input = "default"
-
-# Sobrescreve apenas se for privado
-if estado_privado:
-    st.write("")
-    tipo_input = "password"
-
-texto_usuario = st.text_input("escreve", type=tipo_input)
-
-if st.button("pronto"):
-    if texto_usuario:
-        figura = gerar_grafico(texto_usuario)
-        st.pyplot(figura)
-        
-        buf = io.BytesIO()
-        figura.savefig(buf, format="png", bbox_inches='tight', dpi=100)
-        byte_im = buf.getvalue()
-        
-        st.download_button(
-            label="salvar",
-            data=byte_im,
-            file_name="textopontotexto.png",
-            mime="image/png"
-        )
-    else:
-        st.warning("digite primeiro.")
+        st.warning("Por favor, digite algum texto.")
