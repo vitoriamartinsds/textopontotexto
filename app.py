@@ -98,7 +98,7 @@ def gerar_grafico(frase):
     return fig
 
 # --- Interface ---
-st.title("ponto_palavra")
+st.title("ponto palavra")
 
 estado_privado = st.toggle("esconder")
 
